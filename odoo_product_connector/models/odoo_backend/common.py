@@ -204,7 +204,7 @@ class OdooBackend(models.Model):
         # through all the sync session, instead of recreating a client
         # in each backend adapter usage.
         with MagentoAPI(magento_location) as magento_api:
-            _super = super(MagentoBackend, self)
+            _super = super(OdooBackend, self)
             # from the components we'll be able to do: self.work.magento_api
             with _super.work_on(
                     model_name, magento_api=magento_api, **kwargs) as work:
@@ -265,7 +265,7 @@ class OdooBackend(models.Model):
     def _import_from_date(self, model, from_date_field):
         import_start_time = datetime.now()
         for backend in self:
-            backend.check_magento_structure()
+            # backend.check_magento_structure()
             from_date = backend[from_date_field]
             if from_date:
                 from_date = fields.Datetime.from_string(from_date)
@@ -297,7 +297,7 @@ class OdooBackend(models.Model):
 
     @api.multi
     def import_product_product(self):
-        self._import_from_date('magento.product.product',
+        self._import_from_date('odoo.product.product',
                                'import_products_from_date')
         return True
 
@@ -318,7 +318,7 @@ class OdooBackend(models.Model):
         return True
 
     @api.model
-    def _magento_backend(self, callback, domain=None):
+    def _odoo_backend(self, callback, domain=None):
         if domain is None:
             domain = []
         backends = self.search(domain)
@@ -343,7 +343,7 @@ class OdooBackend(models.Model):
 
     @api.model
     def _scheduler_import_product_product(self, domain=None):
-        self._magento_backend('import_product_product', domain=domain)
+        self._odoo_backend('import_product_product', domain=domain)
 
     @api.model
     def _scheduler_update_product_stock_qty(self, domain=None):

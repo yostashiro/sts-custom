@@ -132,6 +132,7 @@ class OdooCRUDAdapter(AbstractComponent):
         raise NotImplementedError
 
     def read(self, id, attributes=None):
+
         """ Returns the information of a record """
         raise NotImplementedError
 
