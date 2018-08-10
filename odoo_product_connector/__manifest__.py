@@ -37,6 +37,7 @@
         'views/product_view.xml',
         'views/odoo_backend_views.xml',
         'views/connector_odoo_menu.xml',
+        'data/connector_odoo_data.xml',
     ],
     'installable': True,
 }
