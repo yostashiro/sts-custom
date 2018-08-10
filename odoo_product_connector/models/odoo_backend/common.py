@@ -24,15 +24,15 @@ class OdooBackend(models.Model):
     _description = 'Odoo Backend'
     _inherit = 'connector.backend'
 
-    @api.model
-    def select_versions(self):
-        """ Available versions in the backend.
-
-        Can be inherited to add custom versions.  Using this method
-        to add a version from an ``_inherit`` does not constrain
-        to redefine the ``version`` field in the ``_inherit`` model.
-        """
-        return [('1.7', '1.7+')]
+    # @api.model
+    # def select_versions(self):
+    #     """ Available versions in the backend.
+    #
+    #     Can be inherited to add custom versions.  Using this method
+    #     to add a version from an ``_inherit`` does not constrain
+    #     to redefine the ``version`` field in the ``_inherit`` model.
+    #     """
+    #     return [('1.7', '1.7+')]
 
     @api.model
     def _get_stock_field_id(self):
@@ -43,7 +43,7 @@ class OdooBackend(models.Model):
         return field
 
     name = fields.Char(required=True)
-    version = fields.Selection(selection='select_versions', required=True)
+    # version = fields.Selection(selection='select_versions', required=True)
     location = fields.Char(
         string='Location',
         required=True,

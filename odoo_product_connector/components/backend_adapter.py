@@ -119,11 +119,11 @@ class MagentoAPI(object):
                 raise
 
 
-class MagentoCRUDAdapter(AbstractComponent):
+class OdooCRUDAdapter(AbstractComponent):
     """ External Records Adapter for Magento """
 
-    _name = 'magento.crud.adapter'
-    _inherit = ['base.backend.adapter', 'base.magento.connector']
+    _name = 'odoo.crud.adapter'
+    _inherit = ['base.backend.adapter', 'base.odoo.connector']
     _usage = 'backend.adapter'
 
     def search(self, filters=None):
@@ -166,8 +166,8 @@ class MagentoCRUDAdapter(AbstractComponent):
 
 class GenericAdapter(AbstractComponent):
 
-    _name = 'magento.adapter'
-    _inherit = 'magento.crud.adapter'
+    _name = 'odoo.adapter'
+    _inherit = 'odoo.crud.adapter'
 
     _magento_model = None
     _admin_path = None
