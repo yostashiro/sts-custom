@@ -12,7 +12,8 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 from odoo.addons.connector.models import checkpoint
-from ...components.backend_adapter import MagentoLocation, MagentoAPI
+#from ...components.backend_adapter import OdooLocation, MagentoAPI
+from ...components.backend_adapter import OdooLocation, OdooAPI
 
 _logger = logging.getLogger(__name__)
 
@@ -189,26 +190,54 @@ class OdooBackend(models.Model):
         lang = self.default_lang_id
         if lang.code != self.env.context.get('lang'):
             self = self.with_context(lang=lang.code)
-        magento_location = MagentoLocation(
+        odoo_location = OdooLocation(
             self.location,
             self.username,
             self.password,
             use_custom_api_path=self.use_custom_api_path
         )
         if self.use_auth_basic:
-            magento_location.use_auth_basic = True
-            magento_location.auth_basic_username = self.auth_basic_username
-            magento_location.auth_basic_password = self.auth_basic_password
-        # We create a Magento Client API here, so we can create the
+            odoo_location.use_auth_basic = True
+            odoo_location.auth_basic_username = self.auth_basic_username
+            odoo_location.auth_basic_password = self.auth_basic_password
+        # We create a Odoo Client API here, so we can create the
         # client once (lazily on the first use) and propagate it
         # through all the sync session, instead of recreating a client
         # in each backend adapter usage.
-        with MagentoAPI(magento_location) as magento_api:
+        with OdooAPI(odoo_location) as odoo_api:
             _super = super(OdooBackend, self)
             # from the components we'll be able to do: self.work.magento_api
             with _super.work_on(
-                    model_name, magento_api=magento_api, **kwargs) as work:
+                    model_name, odoo_api=odoo_api, **kwargs) as work:
                 yield work
+
+    # @contextmanager
+    # @api.multi
+    # def work_on(self, model_name, **kwargs):
+    #     self.ensure_one()
+    #     lang = self.default_lang_id
+    #     if lang.code != self.env.context.get('lang'):
+    #         self = self.with_context(lang=lang.code)
+    #     magento_location = MagentoLocation(
+    #         self.location,
+    #         self.username,
+    #         self.password,
+    #         use_custom_api_path=self.use_custom_api_path
+    #     )
+    #     if self.use_auth_basic:
+    #         magento_location.use_auth_basic = True
+    #         magento_location.auth_basic_username = self.auth_basic_username
+    #         magento_location.auth_basic_password = self.auth_basic_password
+    #     # We create a Magento Client API here, so we can create the
+    #     # client once (lazily on the first use) and propagate it
+    #     # through all the sync session, instead of recreating a client
+    #     # in each backend adapter usage.
+    #     with MagentoAPI(magento_location) as magento_api:
+    #         _super = super(OdooBackend, self)
+    #         # from the components we'll be able to do: self.work.magento_api
+    #         with _super.work_on(
+    #                 model_name, magento_api=magento_api, **kwargs) as work:
+    #             yield work
 
     @api.multi
     def add_checkpoint(self, record):

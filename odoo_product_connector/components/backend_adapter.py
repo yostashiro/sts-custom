@@ -5,6 +5,7 @@
 import socket
 import logging
 import xmlrpc.client
+import odoorpc
 
 from odoo.addons.component.core import AbstractComponent
 from odoo.addons.queue_job.exception import RetryableJobError
@@ -22,7 +23,7 @@ except ImportError:
 MAGENTO_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
-class MagentoLocation(object):
+class OdooLocation(object):
 
     def __init__(self, location, username, password,
                  use_custom_api_path=False):
@@ -47,12 +48,12 @@ class MagentoLocation(object):
         return location
 
 
-class MagentoAPI(object):
+class OdooAPI(object):
 
     def __init__(self, location):
         """
-        :param location: Magento location
-        :type location: :class:`MagentoLocation`
+        :param location: Odoo location
+        :type location: :class:`OdooLocation`
         """
         self._location = location
         self._api = None
@@ -60,12 +61,12 @@ class MagentoAPI(object):
     @property
     def api(self):
         if self._api is None:
-            custom_url = self._location.use_custom_api_path
-            api = magentolib.API(
-                self._location.location,
+            # custom_url = self._location.use_custom_api_path
+            odoo = odoorpc.ODOO(self._location, port=443)
+            api = odoo.login(
+                'ssttest9',
                 self._location.username,
-                self._location.password,
-                full_url=custom_url
+                self._location.password
             )
             api.__enter__()
             self._api = api
@@ -91,12 +92,14 @@ class MagentoAPI(object):
             try:
                 result = self.api.call(method, arguments)
             except:
-                _logger.error("api.call('%s', %s) failed", method, arguments)
+                _logger.error("api.call('%s', %s) failed", method,
+                              arguments)
                 raise
             else:
-                _logger.debug("api.call('%s', %s) returned %s in %s seconds",
-                              method, arguments, result,
-                              (datetime.now() - start).seconds)
+                _logger.debug(
+                    "api.call('%s', %s) returned %s in %s seconds",
+                    method, arguments, result,
+                    (datetime.now() - start).seconds)
             # Uncomment to record requests/responses in ``recorder``
             # record(method, arguments, result)
             return result
@@ -105,8 +108,8 @@ class MagentoAPI(object):
                 'A network error caused the failure of the job: '
                 '%s' % err)
         except xmlrpc.client.ProtocolError as err:
-            if err.errcode in [502,   # Bad gateway
-                               503,   # Service unavailable
+            if err.errcode in [502,  # Bad gateway
+                               503,  # Service unavailable
                                504]:  # Gateway timeout
                 raise RetryableJobError(
                     'A protocol error caused the failure of the job:\n'
@@ -118,9 +121,80 @@ class MagentoAPI(object):
             else:
                 raise
 
+# class MagentoAPI(object):
+#
+#     def __init__(self, location):
+#         """
+#         :param location: Magento location
+#         :type location: :class:`MagentoLocation`
+#         """
+#         self._location = location
+#         self._api = None
+#
+#     @property
+#     def api(self):
+#         if self._api is None:
+#             custom_url = self._location.use_custom_api_path
+#             api = magentolib.API(
+#                 self._location.location,
+#                 self._location.username,
+#                 self._location.password,
+#                 full_url=custom_url
+#             )
+#             api.__enter__()
+#             self._api = api
+#         return self._api
+#
+#     def __enter__(self):
+#         # we do nothing, api is lazy
+#         return self
+#
+#     def __exit__(self, type, value, traceback):
+#         if self._api is not None:
+#             self._api.__exit__(type, value, traceback)
+#
+#     def call(self, method, arguments):
+#         try:
+#             # When Magento is installed on PHP 5.4+, the API
+#             # may return garble data if the arguments contain
+#             # trailing None.
+#             if isinstance(arguments, list):
+#                 while arguments and arguments[-1] is None:
+#                     arguments.pop()
+#             start = datetime.now()
+#             try:
+#                 result = self.api.call(method, arguments)
+#             except:
+#                 _logger.error("api.call('%s', %s) failed", method, arguments)
+#                 raise
+#             else:
+#                 _logger.debug("api.call('%s', %s) returned %s in %s seconds",
+#                               method, arguments, result,
+#                               (datetime.now() - start).seconds)
+#             # Uncomment to record requests/responses in ``recorder``
+#             # record(method, arguments, result)
+#             return result
+#         except (socket.gaierror, socket.error, socket.timeout) as err:
+#             raise NetworkRetryableError(
+#                 'A network error caused the failure of the job: '
+#                 '%s' % err)
+#         except xmlrpc.client.ProtocolError as err:
+#             if err.errcode in [502,   # Bad gateway
+#                                503,   # Service unavailable
+#                                504]:  # Gateway timeout
+#                 raise RetryableJobError(
+#                     'A protocol error caused the failure of the job:\n'
+#                     'URL: %s\n'
+#                     'HTTP/HTTPS headers: %s\n'
+#                     'Error code: %d\n'
+#                     'Error message: %s\n' %
+#                     (err.url, err.headers, err.errcode, err.errmsg))
+#             else:
+#                 raise
+
 
 class OdooCRUDAdapter(AbstractComponent):
-    """ External Records Adapter for Magento """
+    """ External Records Adapter for Odoo """
 
     _name = 'odoo.crud.adapter'
     _inherit = ['base.backend.adapter', 'base.odoo.connector']
