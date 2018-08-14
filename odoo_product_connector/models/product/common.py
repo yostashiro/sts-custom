@@ -184,7 +184,7 @@ class ProductProductAdapter(Component):
     _inherit = 'odoo.adapter'
     _apply_on = 'odoo.product.product'
 
-    _magento_model = 'catalog_product'
+    _odoo_model = 'product.product'
     _admin_path = '/{model}/edit/id/{id}'
 
     def _call(self, method, arguments):
@@ -208,14 +208,13 @@ class ProductProductAdapter(Component):
             filters = {}
         dt_fmt = MAGENTO_DATETIME_FORMAT
         if from_date is not None:
-            filters.setdefault('updated_at', {})
-            filters['updated_at']['from'] = from_date.strftime(dt_fmt)
+            filters.setdefault('write_date', {})
+            filters['write_date']['from'] = from_date.strftime(dt_fmt)
         if to_date is not None:
-            filters.setdefault('updated_at', {})
-            filters['updated_at']['to'] = to_date.strftime(dt_fmt)
-        # TODO add a search entry point on the Magento API
+            filters.setdefault('write_date', {})
+            filters['write_date']['to'] = to_date.strftime(dt_fmt)
         return [int(row['product_id']) for row
-                in self._call('%s.list' % self._magento_model,
+                in self._call('%s' % self._odoo_model,
                               [filters] if filters else [{}])]
 
     def read(self, id, storeview_id=None, attributes=None):

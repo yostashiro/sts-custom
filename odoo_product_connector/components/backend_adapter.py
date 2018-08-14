@@ -56,31 +56,36 @@ class OdooAPI(object):
         :type location: :class:`OdooLocation`
         """
         self._location = location
-        self._api = None
+        # self._api = None
+        self._odoo = odoorpc.ODOO(location, protocol='jsonrpc+ssl', port=443)
 
-    @property
-    def api(self):
-        if self._api is None:
-            # custom_url = self._location.use_custom_api_path
-            odoo = odoorpc.ODOO(self._location, port=443)
-            api = odoo.login(
-                'ssttest9',
-                self._location.username,
-                self._location.password
-            )
-            api.__enter__()
-            self._api = api
-        return self._api
+    # @property
+    # def api(self):
+    #     if self._api is None:
+    #         # custom_url = self._location.use_custom_api_path
+    #         odoo = odoorpc.ODOO(self._location.location, protocol='jsonrpc+ssl', port=443)
+    #         api = odoo.login(
+    #             'ssttest9',
+    #             self._location.username,
+    #             self._location.password
+    #         )
+    #         api.__enter__()
+    #         self._api = api
+    #     return self._api
 
     def __enter__(self):
-        # we do nothing, api is lazy
+        # do nothing here
         return self
 
     def __exit__(self, type, value, traceback):
-        if self._api is not None:
-            self._api.__exit__(type, value, traceback)
+        # if self._api is not None:
+        #     self._api.__exit__(type, value, traceback)
+        # odoo = odoorpc.ODOO(self._location.location, protocol='jsonrpc+ssl', port=443)
+        # odoo.logout()
+        self._odoo.logout()
 
     def call(self, method, arguments):
+        odoo = self._odoo
         try:
             # When Magento is installed on PHP 5.4+, the API
             # may return garble data if the arguments contain
@@ -90,7 +95,15 @@ class OdooAPI(object):
                     arguments.pop()
             start = datetime.now()
             try:
-                result = self.api.call(method, arguments)
+                # result = self.api.call(method, arguments)
+                # odoo = odoorpc.ODOO(self._location.location,
+                #                     protocol='jsonrpc+ssl', port=443)
+                odoo.login(
+                    'ssttest9',
+                    self._location.username,
+                    self._location.password
+                )
+                result = odoo.env[method]
             except:
                 _logger.error("api.call('%s', %s) failed", method,
                               arguments)
@@ -229,14 +242,14 @@ class OdooCRUDAdapter(AbstractComponent):
 
     def _call(self, method, arguments):
         try:
-            magento_api = getattr(self.work, 'magento_api')
+            odoo_api = getattr(self.work, 'odoo_api')
         except AttributeError:
             raise AttributeError(
-                'You must provide a magento_api attribute with a '
-                'MagentoAPI instance to be able to use the '
+                'You must provide a odoo_api attribute with a '
+                'OdooAPI instance to be able to use the '
                 'Backend Adapter.'
             )
-        return magento_api.call(method, arguments)
+        return odoo_api.call(method, arguments)
 
 
 class GenericAdapter(AbstractComponent):
