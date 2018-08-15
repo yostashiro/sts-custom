@@ -57,7 +57,7 @@ class OdooAPI(object):
         """
         self._location = location
         # self._api = None
-        self._odoo = odoorpc.ODOO(location, protocol='jsonrpc+ssl', port=443)
+        self._odoo = odoorpc.ODOO(location.location, protocol='jsonrpc+ssl', port=443)
 
     # @property
     # def api(self):
@@ -103,7 +103,9 @@ class OdooAPI(object):
                     self._location.username,
                     self._location.password
                 )
-                result = odoo.env[method]
+                # result = odoo.env[method].search([('write_date', '>=', '2018-08-01 00:00:00'), ('write_date', '<=', '2018-08-13 23:59:59')])
+                odoo_field = next(iter(arguments[0]))
+                result = odoo.env[method].search([(odoo_field, '>=', '2018-08-01 00:00:00'), (odoo_field, '<=', '2018-08-13 23:59:59')])
             except:
                 _logger.error("api.call('%s', %s) failed", method,
                               arguments)
