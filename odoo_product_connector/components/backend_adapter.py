@@ -105,7 +105,8 @@ class OdooAPI(object):
                 )
                 # result = odoo.env[method].search([('write_date', '>=', '2018-08-01 00:00:00'), ('write_date', '<=', '2018-08-13 23:59:59')])
                 odoo_field = next(iter(arguments[0]))
-                result = odoo.env[method].search([(odoo_field, '>=', '2018-08-01 00:00:00'), (odoo_field, '<=', '2018-08-13 23:59:59')])
+                # result = odoo.env[method].search([(odoo_field, '>=', '2018-08-01 00:00:00'), (odoo_field, '<=', '2018-08-13 23:59:59')])
+                result = odoo.env[method].search([(odoo_field, '>=', arguments[0][odoo_field]['from']), (odoo_field, '<=', arguments[0][odoo_field]['to'])])
             except:
                 _logger.error("api.call('%s', %s) failed", method,
                               arguments)

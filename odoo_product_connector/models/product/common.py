@@ -213,9 +213,11 @@ class ProductProductAdapter(Component):
         if to_date is not None:
             filters.setdefault('write_date', {})
             filters['write_date']['to'] = to_date.strftime(dt_fmt)
-        return [int(row['product_id']) for row
-                in self._call('%s' % self._odoo_model,
-                              [filters] if filters else [{}])]
+        # return [int(row['product_id']) for row
+        #         in self._call('%s' % self._odoo_model,
+        #                       [filters] if filters else [{}])]
+        return self._call('%s' % self._odoo_model,
+                          [filters] if filters else [{}])
 
     def read(self, id, storeview_id=None, attributes=None):
         """ Returns the information of a record
