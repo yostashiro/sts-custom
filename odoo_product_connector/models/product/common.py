@@ -187,9 +187,9 @@ class ProductProductAdapter(Component):
     _odoo_model = 'product.product'
     _admin_path = '/{model}/edit/id/{id}'
 
-    def _call(self, method, arguments):
+    def _call(self, model, method, arguments):
         try:
-            return super(ProductProductAdapter, self)._call(method, arguments)
+            return super(ProductProductAdapter, self)._call(model, method, arguments)
         except xmlrpc.client.Fault as err:
             # this is the error in the Magento API
             # when the product does not exist
@@ -216,7 +216,7 @@ class ProductProductAdapter(Component):
         # return [int(row['product_id']) for row
         #         in self._call('%s' % self._odoo_model,
         #                       [filters] if filters else [{}])]
-        return self._call('%s' % self._odoo_model,
+        return self._call('%s' % self._odoo_model, 'search',
                           [filters] if filters else [{}])
 
     def read(self, id, storeview_id=None, attributes=None):
@@ -224,8 +224,14 @@ class ProductProductAdapter(Component):
 
         :rtype: dict
         """
-        return self._call('ol_catalog_product.info',
-                          [int(id), storeview_id, attributes, 'id'])
+        return self._call('%s' % self._odoo_model, 'read', id)
+    # def read(self, id, storeview_id=None, attributes=None):
+    #     """ Returns the information of a record
+    #
+    #     :rtype: dict
+    #     """
+    #     return self._call('ol_catalog_product.info',
+    #                       [int(id), storeview_id, attributes, 'id'])
 
     def write(self, id, data, storeview_id=None):
         """ Update records on the external system """

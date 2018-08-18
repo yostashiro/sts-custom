@@ -261,8 +261,8 @@ class ProductImporter(Component):
         """ Import the dependencies for the record"""
         record = self.odoo_record
         # import related categories
-        for mag_category_id in record['categories']:
-            self._import_dependency(mag_category_id,
+        for odoo_category_id in record['categ_id']:
+            self._import_dependency(odoo_category_id,
                                     'odoo.product.category')
         if record['type_id'] == 'bundle':
             self._import_bundle_dependencies()
@@ -292,10 +292,9 @@ class ProductImporter(Component):
 
         :returns: None | str | unicode
         """
-        if self.odoo_record['type_id'] == 'configurable':
-            return _('The configurable product is not imported in Odoo, '
-                     'because only the simple products are used in the sales '
-                     'orders.')
+        if self.odoo_record['type'] == 'service':
+            return _('Service product is not imported into Odoo '
+                     '(out of scope).')
 
     def _validate_data(self, data):
         """ Check if the values to import are correct

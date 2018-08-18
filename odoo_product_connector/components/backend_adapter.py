@@ -84,7 +84,7 @@ class OdooAPI(object):
         # odoo.logout()
         self._odoo.logout()
 
-    def call(self, method, arguments):
+    def call(self, model, method, arguments):
         odoo = self._odoo
         try:
             # When Magento is installed on PHP 5.4+, the API
@@ -96,17 +96,18 @@ class OdooAPI(object):
             start = datetime.now()
             try:
                 # result = self.api.call(method, arguments)
-                # odoo = odoorpc.ODOO(self._location.location,
-                #                     protocol='jsonrpc+ssl', port=443)
                 odoo.login(
                     'ssttest9',
                     self._location.username,
                     self._location.password
                 )
-                # result = odoo.env[method].search([('write_date', '>=', '2018-08-01 00:00:00'), ('write_date', '<=', '2018-08-13 23:59:59')])
-                odoo_field = next(iter(arguments[0]))
-                # result = odoo.env[method].search([(odoo_field, '>=', '2018-08-01 00:00:00'), (odoo_field, '<=', '2018-08-13 23:59:59')])
-                result = odoo.env[method].search([(odoo_field, '>=', arguments[0][odoo_field]['from']), (odoo_field, '<=', arguments[0][odoo_field]['to'])])
+                if method == 'search':
+                    # result = odoo.env[method].search([('write_date', '>=', '2018-08-01 00:00:00'), ('write_date', '<=', '2018-08-13 23:59:59')])
+                    odoo_field = next(iter(arguments[0]))
+                    # result = odoo.env[method].search([(odoo_field, '>=', '2018-08-01 00:00:00'), (odoo_field, '<=', '2018-08-13 23:59:59')])
+                    result = odoo.env[model].search([(odoo_field, '>=', arguments[0][odoo_field]['from']), (odoo_field, '<=', arguments[0][odoo_field]['to'])])
+                if method == 'read':
+                    result = odoo.env[model].read(arguments)[0] # return dict
             except:
                 _logger.error("api.call('%s', %s) failed", method,
                               arguments)
@@ -243,7 +244,7 @@ class OdooCRUDAdapter(AbstractComponent):
         """ Delete a record on the external system """
         raise NotImplementedError
 
-    def _call(self, method, arguments):
+    def _call(self, model, method, arguments):
         try:
             odoo_api = getattr(self.work, 'odoo_api')
         except AttributeError:
@@ -252,7 +253,7 @@ class OdooCRUDAdapter(AbstractComponent):
                 'OdooAPI instance to be able to use the '
                 'Backend Adapter.'
             )
-        return odoo_api.call(method, arguments)
+        return odoo_api.call(model, method, arguments)
 
 
 class GenericAdapter(AbstractComponent):
