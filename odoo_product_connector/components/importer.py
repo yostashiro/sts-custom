@@ -217,7 +217,8 @@ class OdooImporter(AbstractComponent):
 
         self.binder.bind(self.external_id, binding)
 
-        self._after_import(binding)
+        # comment out this line for now
+        # self._after_import(binding)
 
 
 class BatchImporter(AbstractComponent):

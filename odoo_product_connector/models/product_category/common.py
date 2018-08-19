@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2013-2017 Camptocamp SA
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
@@ -91,8 +90,9 @@ class ProductCategoryAdapter(Component):
 
         :rtype: dict
         """
-        return self._call('%s.info' % self._odoo_model,
-                          [int(id), storeview_id, attributes])
+        # return self._call('%s.info' % self._odoo_model, 'read',
+        #                   [int(id), storeview_id, attributes])
+        return self._call('%s' % self._odoo_model, 'read', id)
 
     def tree(self, parent_id=None, storeview_id=None):
         """ Returns a tree of product categories

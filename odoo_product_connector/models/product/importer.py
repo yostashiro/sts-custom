@@ -173,12 +173,18 @@ class ProductImportMapper(Component):
     direct = [('name', 'name'),
               ('description', 'description'),
               ('weight', 'weight'),
-              ('cost', 'standard_price'),
-              ('short_description', 'description_sale'),
-              ('sku', 'default_code'),
-              ('type_id', 'product_type'),
-              (normalize_datetime('created_at'), 'created_at'),
-              (normalize_datetime('updated_at'), 'updated_at'),
+              # ('cost', 'standard_price'),
+              # ('short_description', 'description_sale'),
+              # ('sku', 'default_code'),
+              # ('type_id', 'product_type'),
+              ('standard_price', 'standard_price'),
+              ('description_sale', 'description_sale'),
+              ('default_code', 'default_code'),
+              ('type', 'type'),
+              # (normalize_datetime('created_at'), 'created_at'),
+              # (normalize_datetime('updated_at'), 'updated_at'),
+              ('created_date', 'create_date'),
+              ('write_date', 'write_date'),
               ]
 
     @mapping
@@ -261,11 +267,13 @@ class ProductImporter(Component):
         """ Import the dependencies for the record"""
         record = self.odoo_record
         # import related categories
-        for odoo_category_id in record['categ_id']:
-            self._import_dependency(odoo_category_id,
-                                    'odoo.product.category')
-        if record['type_id'] == 'bundle':
-            self._import_bundle_dependencies()
+        # for odoo_category_id in record['categ_id']:
+        #     self._import_dependency(odoo_category_id,
+        #                             'odoo.product.category')
+        odoo_categ_id = record['categ_id'][0]
+        self._import_dependency(odoo_categ_id, 'odoo.product.category')
+        # if record['type_id'] == 'bundle':
+        #     self._import_bundle_dependencies()
 
     def _validate_product_type(self, data):
         """ Check if the product type is in the selection (so we can
