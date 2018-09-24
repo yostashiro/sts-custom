@@ -97,7 +97,7 @@ class OdooAPI(object):
             try:
                 # result = self.api.call(method, arguments)
                 odoo.login(
-                    'ssttest9',
+                    'ssttest11',
                     self._location.username,
                     self._location.password
                 )

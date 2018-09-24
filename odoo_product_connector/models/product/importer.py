@@ -181,6 +181,7 @@ class ProductImportMapper(Component):
               ('description_sale', 'description_sale'),
               ('default_code', 'default_code'),
               ('type', 'type'),
+              ('categ_id', 'categ_id'),
               # (normalize_datetime('created_at'), 'created_at'),
               # (normalize_datetime('updated_at'), 'updated_at'),
               ('created_date', 'create_date'),
@@ -206,44 +207,52 @@ class ProductImportMapper(Component):
             return {'type': 'service'}
         return
 
-    @mapping
-    def website_ids(self, record):
-        website_ids = []
-        binder = self.binder_for('odoo.website')
-        for mag_website_id in record['websites']:
-            website_binding = binder.to_internal(mag_website_id)
-            website_ids.append((4, website_binding.id))
-        return {'website_ids': website_ids}
+    # @mapping
+    # def website_ids(self, record):
+    #     website_ids = []
+    #     binder = self.binder_for('odoo.website')
+    #     for mag_website_id in record['websites']:
+    #         website_binding = binder.to_internal(mag_website_id)
+    #         website_ids.append((4, website_binding.id))
+    #     return {'website_ids': website_ids}
 
-    @mapping
-    def categories(self, record):
-        mag_categories = record['categories']
-        binder = self.binder_for('odoo.product.category')
-
-        category_ids = []
-        main_categ_id = None
-
-        for mag_category_id in mag_categories:
-            cat = binder.to_internal(mag_category_id, unwrap=True)
-            if not cat:
-                raise MappingError("The product category with "
-                                   "odoo id %s is not imported." %
-                                   mag_category_id)
-
-            category_ids.append(cat.id)
-
-        if category_ids:
-            main_categ_id = category_ids.pop(0)
-
-        if main_categ_id is None:
-            default_categ = self.backend_record.default_category_id
-            if default_categ:
-                main_categ_id = default_categ.id
-
-        result = {'categ_ids': [(6, 0, category_ids)]}
-        if main_categ_id:  # OpenERP assign 'All Products' if not specified
-            result['categ_id'] = main_categ_id
-        return result
+    # @mapping
+    # def categories(self, record):
+    #     result = {}  # qtl add
+    #     # mag_categories = record['categories']
+    #     odoo_categ_id = record['categ_id'][0]
+    #     binder = self.binder_for('odoo.product.category')
+    #
+    #     # category_ids = []
+    #     # main_categ_id = None
+    #     #
+    #     # for mag_category_id in mag_categories:
+    #     #     cat = binder.to_internal(mag_category_id, unwrap=True)
+    #     #     if not cat:
+    #     #         raise MappingError("The product category with "
+    #     #                            "odoo id %s is not imported." %
+    #     #                            mag_category_id)
+    #     #
+    #     #     category_ids.append(cat.id)
+    #     cat = binder.to_internal(odoo_categ_id, unwrap=True)
+    #     if not cat:
+    #         raise MappingError("The product category with "
+    #                                    "odoo id %s is not imported." %
+    #                                    odoo_categ_id)
+    #
+    #     # if category_ids:
+    #     #     main_categ_id = category_ids.pop(0)
+    #     #
+    #     # if main_categ_id is None:
+    #     #     default_categ = self.backend_record.default_category_id
+    #     #     if default_categ:
+    #     #         main_categ_id = default_categ.id
+    #
+    #     # result = {'categ_ids': [(6, 0, category_ids)]}
+    #     # if main_categ_id:  # OpenERP assign 'All Products' if not specified
+    #     #     result['categ_id'] = main_categ_id
+    #     result['categ_id'] = odoo_categ_id
+    #     return result
 
     @mapping
     def backend_id(self, record):

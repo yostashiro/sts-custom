@@ -320,7 +320,8 @@ class OdooBackend(models.Model):
 
     @api.multi
     def import_product_categories(self):
-        self._import_from_date('magento.product.category',
+        # self._import_from_date('magento.product.category',
+        self._import_from_date('odoo.product.category',
                                'import_categories_from_date')
         return True
 
